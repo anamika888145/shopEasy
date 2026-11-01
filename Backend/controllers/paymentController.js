@@ -14,6 +14,7 @@ const razorpay = new Razorpay({
 // CREATE RAZORPAY ORDER
 // ==========================================
 
+
 export const createPaymentOrder = async (req, res) => {
   try {
     const { productId, quantity = 1 } = req.body;
@@ -34,7 +35,12 @@ export const createPaymentOrder = async (req, res) => {
       });
     }
 
+    console.log("PAYMENT PRODUCT ID:", productId);
+
+    // Find product first
     const product = await Product.findById(productId);
+
+    console.log("FOUND PRODUCT:", product);
 
     if (!product) {
       return res.status(404).json({
@@ -50,60 +56,46 @@ export const createPaymentOrder = async (req, res) => {
       });
     }
 
-    // Amount backend ke database wale price se calculate hoga
-    const totalAmount =
-      Number(product.price) * qty;
+    const totalAmount = Number(product.price) * qty;
 
-    if (
-      !Number.isFinite(totalAmount) ||
-      totalAmount <= 0
-    ) {
+    if (!Number.isFinite(totalAmount) || totalAmount <= 0) {
       return res.status(400).json({
         success: false,
         message: "Invalid product price",
       });
     }
 
-    const razorpayOrder =
-      await razorpay.orders.create({
-        amount: Math.round(totalAmount * 100),
-        currency: "INR",
-        receipt: `receipt_${Date.now()}`,
+    const razorpayOrder = await razorpay.orders.create({
+      amount: Math.round(totalAmount * 100),
+      currency: "INR",
+      receipt: `receipt_${Date.now()}`,
+      notes: {
+        productId: String(product._id),
+        userId: String(req.user._id),
+        quantity: String(qty),
+      },
+    });
 
-        notes: {
-          productId: String(product._id),
-          userId: String(req.user._id),
-          quantity: String(qty),
-        },
-      });
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-
       keyId: process.env.RAZORPAY_KEY_ID,
-
       order: razorpayOrder,
-
       product: {
         id: product._id,
         name: product.name,
         price: product.price,
         image: product.image || "",
       },
-
       quantity: qty,
-
       totalAmount,
     });
-  } catch (error) {
-    console.error(
-      "RAZORPAY CREATE ORDER ERROR:",
-      error
-    );
 
-    res.status(500).json({
+  } catch (error) {
+    console.error("RAZORPAY CREATE ORDER ERROR:", error);
+
+    return res.status(500).json({
       success: false,
-      message: "Unable to create payment order",
+      message: error.message || "Unable to create payment order",
     });
   }
 };
