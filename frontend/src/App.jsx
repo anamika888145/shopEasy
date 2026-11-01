@@ -13,7 +13,7 @@ import LoginForm from "./LoginForm";
 
 import "./index.css";
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = "https://shopeasy-g534.onrender.com/api";
 const BACKEND_URL = "http://localhost:5000";
 
 const getImageUrl = (image) => {
