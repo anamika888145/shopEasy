@@ -13,6 +13,8 @@ import paymentRoutes from "./routes/paymentRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import couponRoutes from "./routes/couponRoutes.js";
 import addressRoutes from "./routes/addressRoutes.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
 import {
   notFound,
@@ -20,6 +22,9 @@ import {
 } from "./Middleware/errorMiddleware.js";
 
 const app = express();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // 1. CORS
 app.use(
@@ -34,8 +39,7 @@ app.use(
 app.use(express.json());
 
 // 3. Serve uploaded product images
-app.use("/uploads", express.static("uploads"));
-
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // 4. Basic routes
 app.get("/", (req, res) => {
   res.json({ message: "ShopEasy API is running" });

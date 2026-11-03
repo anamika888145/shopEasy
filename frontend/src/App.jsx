@@ -14,18 +14,20 @@ import LoginForm from "./LoginForm";
 import "./index.css";
 
 const API_URL = "https://shopeasy-g534.onrender.com/api";
-const BACKEND_URL = "http://localhost:5000";
+const BACKEND_URL = "https://shopeasy-g534.onrender.com";
 
 const getImageUrl = (image) => {
   if (!image) return "";
 
-  if (image.startsWith("http://") || image.startsWith("https://")) {
+  if (
+    image.startsWith("http://") ||
+    image.startsWith("https://")
+  ) {
     return image;
   }
 
   return `${BACKEND_URL}${image.startsWith("/") ? "" : "/"}${image}`;
-};
-
+};  
 function App() {
   // ==========================================
   // PRODUCT DATA
