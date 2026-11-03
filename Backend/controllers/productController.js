@@ -1,4 +1,27 @@
+
 import Product from "../models/Product.js";
+import cloudinary from "../config/cloudinary.js";
+
+// UPLOAD IMAGE TO CLOUDINARY
+const uploadToCloudinary = (fileBuffer) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: "shopeasy/products",
+        resource_type: "image",
+      },
+      (error, result) => {
+        if (error) {
+          return reject(error);
+        }
+
+        resolve(result.secure_url);
+      }
+    );
+
+    stream.end(fileBuffer);
+  });
+};
 
 // GET ALL PRODUCTS
 export const getProducts = async (req, res) => {
@@ -80,7 +103,9 @@ export const createProduct = async (req, res) => {
     };
 
     if (req.file) {
-      productData.image = `/uploads/${req.file.filename}`;
+      productData.image = await uploadToCloudinary(
+        req.file.buffer
+      );
     }
 
     const product = await Product.create(productData);
@@ -103,7 +128,9 @@ export const updateProduct = async (req, res) => {
     };
 
     if (req.file) {
-      productData.image = `/uploads/${req.file.filename}`;
+      productData.image = await uploadToCloudinary(
+        req.file.buffer
+      );
     }
 
     const product = await Product.findByIdAndUpdate(
